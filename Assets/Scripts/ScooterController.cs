@@ -1,15 +1,21 @@
 ﻿using UnityEngine;
+using TMPro;
 
 public class ScooterController : MonoBehaviour
 {
-    public GameObject lHand, rHand, modelPivot, directionalPivot, straightRef, body;
+    public GameObject lHand, rHand, modelPivot, directionalPivot, straightRef;
     public float currentVelocity, initalVelocity, finalVelocity, accelerationRate, decelerationRate, frictionRate;
     public float rotationVelocity;
+    public GameObject speedometerDial;
     private Vector3 lPos, rPos;
+    Quaternion dialRotation;
+    private Rigidbody rb;
    
     private void Start()
     {
         modelPivot.transform.rotation = rHand.transform.rotation;
+        if (speedometerDial) dialRotation = speedometerDial.transform.localRotation;
+        rb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
@@ -18,6 +24,7 @@ public class ScooterController : MonoBehaviour
         UpdatePivot();
         UpdateScooterPosition();
         UpdateScooterRotation();
+        UpdateSpeedometer();
     }
 
     void UpdatePivot()
@@ -43,6 +50,7 @@ public class ScooterController : MonoBehaviour
         currentVelocity = Mathf.Clamp(currentVelocity, initalVelocity, finalVelocity);
         Debug.Log("Velocity: " + currentVelocity);
 
+        //rb.AddForce(Vector3.forward * currentVelocity);
         transform.Translate(Vector3.forward * currentVelocity);
     }
 
@@ -56,8 +64,8 @@ public class ScooterController : MonoBehaviour
             d.Normalize();
 
             float angle = Vector2.SignedAngle(s, d);
+            //rb.AddTorque(new Vector3(0, 1, 0), -angle * rotationVelocity * Time.deltaTime);
             transform.Rotate(new Vector3(0, 1, 0), -angle * rotationVelocity * Time.deltaTime);
-            
 
             // 3D flying scooter (E.T. Mode)
             /*        
@@ -74,4 +82,13 @@ public class ScooterController : MonoBehaviour
         }
     }
 
+    void UpdateSpeedometer()
+    {
+        if (speedometerDial != null) {
+            Vector3 dialRot = dialRotation.eulerAngles;
+            Vector3 newRotation = new Vector3(dialRot.x, dialRot.y, dialRot.z - (140 * currentVelocity));
+            Debug.Log("Dial rotation: " + newRotation);
+            speedometerDial.transform.localRotation = Quaternion.Euler(newRotation);
+        }
+    }
 }

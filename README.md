@@ -1,1 +1,1 @@
-# ScootVR
+# Scoot
